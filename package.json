@@ -1,0 +1,47 @@
+{
+  "name": "backand-hosting-s3",
+  "version": "1.0.0",
+  "description": "Sync a source folder to AWS S3 bucket",
+  "homepage": "http://github.com/backand/backand-hosting-s3",
+  "main": "./backand_sync_s3.js",
+  "files": [
+    "backand_sync_s3.js", "config.js"
+  ],
+  "bin": {
+    "backand_sync_s3": "./backand_sync_s3.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/backand/backand-hosting-s3"
+  },
+  "dependencies": {
+    "aws-sdk": "latest",
+    "del": "latest",
+    "gulp": "latest",
+    "gulp-awspublish": "latest",
+    "gulp-awspublish-router": "latest",
+    "gulp-downloader": "^1.0.4",
+    "gulp-json-editor": "^2.2.1",
+    "gulp-rename": "latest",
+    "gulp-watch": "latest",
+    "jsonfile": "^2.2.3",
+    "minimist": "latest",
+    "underscore": "latest",
+    "uuid": "latest",
+    "concurrent-transform": "latest"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">= 0.9"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Yoram Kornatzky",
+  "licenses": [
+    {
+      "type": "MIT"
+    }
+  ],
+  "private": false
+}
