@@ -1,6 +1,6 @@
 {
   "name": "backand-hosting-s3",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Sync a source folder to AWS S3 bucket",
   "homepage": "http://github.com/backand/backand-hosting-s3",
   "main": "./backand_sync_s3.js",
