@@ -134,12 +134,17 @@ function dist(folder){
         .pipe(awspublish.reporter());
 }
 
-function sts(username, password){
+function sts(username, password, accessToken){
 
     var downloadOptions = {
-      url: "http://" + username + ":" + password + "@" +   sts_url.replace(/http(s)?:\/\//, ''),
+      url: accessToken ? sts_url : "http://" + username + ":" + password + "@" +   sts_url.replace(/http(s)?:\/\//, ''),
       method: 'POST'
     };
+    if (accessToken){
+        downloadOptions.headers = { 
+            'Authorization': 'Bearer' + " " + accessToken
+        };
+    }
 
     return download({
           fileName: temporaryCredentialsFile,
