@@ -29,3 +29,6 @@ node_modules
 # Sublime Text
 backand-hosting-s3.sublime-project
 backand-hosting-s3.sublime-workspace
+
+# tgz from npm pack
+backand-hosting-s3-*.tgz
