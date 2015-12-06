@@ -137,7 +137,7 @@ function dist(folder){
 function sts(username, password, accessToken){
 
     var downloadOptions = {
-      url: accessToken ? sts_url : "http://" + username + ":" + password + "@" +   sts_url.replace(/http(s)?:\/\//, ''),
+      url: accessToken ? sts_url : "https://" + username + ":" + password + "@" +   sts_url.replace(/http(s)?:\/\//, ''),
       method: 'POST'
     };
     if (accessToken){
