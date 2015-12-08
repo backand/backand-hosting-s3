@@ -7,7 +7,7 @@ Sync a local folder to Backand AWS S3 hosting bucket
         var gulp = require('gulp');
         var backandSync = require('../sync-module');
 
-2. Set credentials. Credentials will be stored in file `temporary-credentials.json`:
+2. Set credentials. Credentials will be stored in file `.backand-credentials.json`:
 
         gulp.task('sts', function(){
             var masterToken = "your master backand token";

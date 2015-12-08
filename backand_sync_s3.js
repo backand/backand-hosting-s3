@@ -16,13 +16,17 @@ var sts_url = require('./config').sts_url;
 
 var options = minimist(process.argv.slice(2));
 
-var temporaryCredentialsFile = 'temporary-credentials.json';
+var temporaryCredentialsFile = './.backand-credentials.json';
 
 
-function dist(folder){
+function dist(folder, appName){
     
     // get credentials
     var storedData = JSON.parse(fs.readFileSync(temporaryCredentialsFile, 'utf8'));
+
+    if (appName){
+        storedData = storedData[appName];
+    }
 
     var credentials = storedData.credentials;
     var info = storedData.info;
@@ -136,6 +140,13 @@ function dist(folder){
 
 function sts(username, password, accessToken){
 
+    if (fs.existsSync(temporaryCredentialsFile)) {
+        credentials = JSON.parse(fs.readFileSync(temporaryCredentialsFile));
+    } 
+    else{
+        credentials ={};
+    }
+
     var downloadOptions = {
       url: accessToken ? sts_url : "https://" + username + ":" + password + "@" +   sts_url.replace(/http(s)?:\/\//, ''),
       method: 'POST'
@@ -150,21 +161,27 @@ function sts(username, password, accessToken){
           fileName: temporaryCredentialsFile,
           request: downloadOptions
         })
-        .pipe(jeditor(function(json) {   // must return JSON object.   
-            var credentials = { 
-                accessKeyId: json.Credentials.AccessKeyId,
-                secretAccessKey: json.Credentials.SecretAccessKey,
-                sessionToken: json.Credentials.SessionToken
-            };
-            var info = {
-                bucket: json.Info.Bucket,
-                dir: json.Info.Dir
-            }
+        .pipe(jeditor(function(json) {   // must return JSON object.  
 
-            return {
-                credentials: credentials,
-                info: info
-            };
+            var appName = json.Info.Dir;
+            var stsCredentials = {
+                credentials: { 
+                    accessKeyId: json.Credentials.AccessKeyId,
+                    secretAccessKey: json.Credentials.SecretAccessKey,
+                    sessionToken: json.Credentials.SessionToken
+                },
+                info: {
+                    bucket: json.Info.Bucket,
+                    dir: json.Info.Dir
+                }
+            };            
+            if (credentials[appName]){
+                credentials[appName] = _.extend(credentials[appName], stsCredentials)
+            }
+            else{
+                credentials[appName] = stsCredentials;
+            }
+            return credentials;
         }))
         .pipe(gulp.dest('.'))
       ;
@@ -173,6 +190,8 @@ function sts(username, password, accessToken){
 function clean(){
     return del(['./.awspublish*']);
 }
+
+
 
 module.exports = {
     dist: dist,
