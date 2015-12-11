@@ -10,6 +10,7 @@ var rename = require("gulp-rename");
 var download = require('gulp-downloader');
 var jeditor = require("gulp-json-editor");
 var parallelize = require("concurrent-transform");
+var notify = require("gulp-notify");
 
 
 var sts_url = require('./config').sts_url;
@@ -26,6 +27,20 @@ function dist(folder, appName){
 
     if (appName){
         storedData = storedData[appName];
+    }
+    else {
+        storedData = _.first(_.values(storeData))
+    }
+    if (!storedData){
+        return gulp.src(folder)
+            .pipe(notify({
+                message: "No credentials for this app",
+                title: "Failure",
+                notifier: function (options, callback) {
+                    console.log(options.title + ":" + options.message);
+                    callback();
+                }
+            }));
     }
 
     var credentials = storedData.credentials;
