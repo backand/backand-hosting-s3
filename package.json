@@ -29,7 +29,8 @@
     "minimist": "latest",
     "underscore": "latest",
     "uuid": "latest",
-    "concurrent-transform": "latest"
+    "concurrent-transform": "latest",
+    "gulp-notify": "latest"
   },
   "devDependencies": {},
   "engines": {

@@ -29,7 +29,7 @@ function dist(folder, appName){
         storedData = storedData[appName];
     }
     else {
-        storedData = _.first(_.values(storeData))
+        storedData = _.first(_.values(storedData))
     }
     if (!storedData){
         return gulp.src(folder)
