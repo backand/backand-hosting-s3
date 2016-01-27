@@ -11,6 +11,8 @@ var download = require('gulp-downloader');
 var jeditor = require("gulp-json-editor");
 var parallelize = require("concurrent-transform");
 var notify = require("gulp-notify");
+var colors = require('colors');
+var expect = require('gulp-expect-file');
 
 
 var sts_url = require('./config').sts_url;
@@ -18,6 +20,7 @@ var sts_url = require('./config').sts_url;
 var options = minimist(process.argv.slice(2));
 
 var temporaryCredentialsFile = './.backand-credentials.json';
+
 
 
 function dist(folder, appName){
@@ -58,11 +61,17 @@ function dist(folder, appName){
       }
     );
 
+    var successMessage = "the code was sync and now available in: https://hosting.backand.io/" + dir;
 
     var publisher = awspublish.create(publisherOptions);
  
     // this will publish and sync bucket files with the one in your public directory 
     return gulp.src(folder + '/**/*.*')
+
+        .pipe(expect({ errorOnFailure: true, reportUnexpected: false }, [folder + '/index.html']))
+        .on('error', function (err) { 
+            console.error("the root folder doesn't have index.html page and the web app may not be available".yellow); 
+        })
 
         // rename extensions to lower case
         .pipe(rename(function (path) {
@@ -150,7 +159,17 @@ function dist(folder, appName){
         .pipe(publisher.cache())
     
         // print upload updates to console     
-        .pipe(awspublish.reporter());
+        .pipe(awspublish.reporter())
+        .pipe(notify({
+            message: successMessage.green,
+            title: "Success",
+            onLast: true,
+            notifier: function (options, callback) {
+                console.log(options.title + ":" + options.message);
+                callback();
+            }
+        }));
+        
 }
 
 function sts(username, password, accessToken){
@@ -207,9 +226,9 @@ function clean(){
 }
 
 
-
 module.exports = {
     dist: dist,
     sts: sts,
     clean: clean
 }
+

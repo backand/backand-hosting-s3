@@ -17,20 +17,22 @@
   },
   "dependencies": {
     "aws-sdk": "latest",
+    "colors": "latest",
+    "concurrent-transform": "latest",
     "del": "latest",
     "gulp": "latest",
     "gulp-awspublish": "latest",
     "gulp-awspublish-router": "latest",
     "gulp-downloader": "^1.0.4",
+    "gulp-expect-file": "0.0.7",
     "gulp-json-editor": "^2.2.1",
+    "gulp-notify": "latest",
     "gulp-rename": "latest",
     "gulp-watch": "latest",
     "jsonfile": "^2.2.3",
     "minimist": "latest",
     "underscore": "latest",
-    "uuid": "latest",
-    "concurrent-transform": "latest",
-    "gulp-notify": "latest"
+    "uuid": "latest"
   },
   "devDependencies": {},
   "engines": {
