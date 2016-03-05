@@ -13,6 +13,7 @@ var parallelize = require("concurrent-transform");
 var notify = require("gulp-notify");
 var colors = require('colors');
 var expect = require('gulp-expect-file');
+var gulpIgnore = require('gulp-ignore');
 
 
 var sts_url = require('./config').sts_url;
@@ -21,7 +22,8 @@ var options = minimist(process.argv.slice(2));
 
 var temporaryCredentialsFile = './.backand-credentials.json';
 
-
+// files with such characters are not synced
+var specialChars = "[" + "@#" + "]";
 
 function dist(folder, appName){
     
@@ -64,6 +66,19 @@ function dist(folder, appName){
     var successMessage = "the code was sync and now available in: https://hosting.backand.io/" + dir;
 
     var publisher = awspublish.create(publisherOptions);
+
+    // exclude files with special characters in name
+    function condition(file){
+        var suffix = file.path.substr(file.base.length);
+        var re = new RegExp(specialChars);
+        var flag = re.test(suffix);
+        var warning = "Warning: Cannot sync files with characters: " + specialChars + " in the file name: ";
+        if (flag){
+            var message = warning + suffix;
+            console.log(message.red);
+        }
+        return flag;
+    }
  
     // this will publish and sync bucket files with the one in your public directory 
     return gulp.src(folder + '/**/*.*')
@@ -72,6 +87,9 @@ function dist(folder, appName){
         .on('error', function (err) { 
             console.error("the root folder doesn't have index.html page and the web app may not be available".yellow); 
         })
+
+        // exclude files with special characters in name
+        .pipe(gulpIgnore.exclude(condition))
 
         // rename extensions to lower case
         .pipe(rename(function (path) {
@@ -196,7 +214,7 @@ function sts(username, password, accessToken){
           request: downloadOptions
         })
         .pipe(jeditor(function(json) {   // must return JSON object.  
-
+            console.log(json);
             var appName = json.Info.Dir;
             var stsCredentials = {
                 credentials: { 

@@ -25,6 +25,7 @@
     "gulp-awspublish-router": "latest",
     "gulp-downloader": "^1.0.4",
     "gulp-expect-file": "0.0.7",
+    "gulp-ignore": "^2.0.1",
     "gulp-json-editor": "^2.2.1",
     "gulp-notify": "latest",
     "gulp-rename": "latest",
