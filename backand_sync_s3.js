@@ -14,6 +14,7 @@ var notify = require("gulp-notify");
 var colors = require('colors');
 var expect = require('gulp-expect-file');
 var gulpIgnore = require('gulp-ignore');
+var path = require('path');
 
 
 var sts_url = require('./config').sts_url;
@@ -83,7 +84,7 @@ function dist(folder, appName){
     // this will publish and sync bucket files with the one in your public directory 
     return gulp.src(folder + '/**/*.*')
 
-        .pipe(expect({ errorOnFailure: true, reportUnexpected: false }, [folder + '/index.html']))
+        .pipe(expect({ errorOnFailure: true, reportUnexpected: false }, [folder + path.sep + 'index.html']))
         .on('error', function (err) { 
             console.error("the root folder doesn't have index.html page and the web app may not be available".yellow); 
         })
