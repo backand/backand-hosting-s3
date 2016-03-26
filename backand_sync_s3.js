@@ -60,7 +60,7 @@ function dist(folder, appName){
           Bucket: info.bucket,
           // ACL: "public-read"
         },
-        logger: process.stdout
+        // logger: process.stdout
       }
     );
 
@@ -215,7 +215,7 @@ function sts(username, password, accessToken){
           request: downloadOptions
         })
         .pipe(jeditor(function(json) {   // must return JSON object.  
-            console.log(json);
+
             var appName = json.Info.Dir;
             var stsCredentials = {
                 credentials: { 
