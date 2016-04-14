@@ -1,24 +1,24 @@
-var gulp = require('gulp');
+var gulp =  require('gulp');
 var watch = require('gulp-watch');
 var awspublish = require('gulp-awspublish');
 var _ = require('underscore');
 var fs = require('fs');
-var del = require('del');
+var del =require('del');
 var awspublishRouter = require("gulp-awspublish-router");
 var minimist = require('minimist');
 var rename = require("gulp-rename");
 var download = require('gulp-downloader');
 var jeditor = require("gulp-json-editor");
 var parallelize = require("concurrent-transform");
-var notify = require("gulp-notify");
-var colors = require('colors');
+var notify =  require("gulp-notify");
+var colors =  require('colors');
 var expect = require('gulp-expect-file');
-var gulpIgnore = require('gulp-ignore');
+var gulpIgnore =  require('gulp-ignore');
 var path = require('path');
 
 
-var sts_url = require('./config').sts_url;
 
+var config =  require('./config');
 var options = minimist(process.argv.slice(2));
 
 var temporaryCredentialsFile = './.backand-credentials.json';
@@ -26,10 +26,15 @@ var temporaryCredentialsFile = './.backand-credentials.json';
 // files with such characters are not synced
 var specialChars = "[" + "@#" + "]";
 
-function dist(folder, appName){
-    
+function dist(folder, appName, service, destFolder){
+
+    if (!service)
+        service == "hosting";
+
     // get credentials
-    var storedData = JSON.parse(fs.readFileSync(temporaryCredentialsFile, 'utf8'));
+    var cred = fs.readFileSync(temporaryCredentialsFile, 'utf8');
+
+    var storedData = JSON.parse(cred);
 
     if (appName){
         storedData = storedData[appName];
@@ -37,6 +42,7 @@ function dist(folder, appName){
     else {
         storedData = _.first(_.values(storedData))
     }
+
     if (!storedData){
         return gulp.src(folder)
             .pipe(notify({
@@ -49,22 +55,26 @@ function dist(folder, appName){
             }));
     }
 
-    var credentials = storedData.credentials;
-    var info = storedData.info;
+    var credentials = storedData[service].credentials;
+    var info = storedData[service].info;
     var dir = info.dir;
-    // create a new publisher using S3 options 
-    // http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#constructor-property 
-    var publisherOptions = _.extend(credentials,   
-      {
-        params: {
-          Bucket: info.bucket,
-          // ACL: "public-read"
-        },
-        // logger: process.stdout
-      }
+    if (destFolder)
+        dir = dir  + "/" + destFolder;
+
+
+    // create a new publisher using S3 options
+    // http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#constructor-property
+    var publisherOptions = _.extend(credentials,
+        {
+            params: {
+                Bucket: info.bucket,
+                // ACL: "public-read"
+            },
+            //logger: process.stdout
+        }
     );
 
-    var successMessage = "the code was sync and now available in: https://hosting.backand.io/" + dir;
+    var successMessage = "the code was sync and now available in: https://" + info.bucket + "/" + dir;
 
     var publisher = awspublish.create(publisherOptions);
 
@@ -72,7 +82,7 @@ function dist(folder, appName){
     function condition(file){
         var suffix = file.path.substr(file.base.length);
         var re = new RegExp(specialChars);
-        var flag = re.test(suffix);
+        var flag = service === "hosting" && re.test(suffix);
         var warning = "Warning: Cannot sync files with characters: " + specialChars + " in the file name: ";
         if (flag){
             var message = warning + suffix;
@@ -80,13 +90,16 @@ function dist(folder, appName){
         }
         return flag;
     }
- 
-    // this will publish and sync bucket files with the one in your public directory 
+
+    var pathValidation = 'index.html';
+    if (service === "nodejs")
+        pathValidation = "handler.js";
+    // this will publish and sync bucket files with the one in your public directory
     return gulp.src(folder + '/**/*.*')
 
-        .pipe(expect({ errorOnFailure: true, reportUnexpected: false }, [folder + path.sep + 'index.html']))
-        .on('error', function (err) { 
-            console.error("the root folder doesn't have index.html page and the web app may not be available".yellow); 
+        .pipe(expect({ errorOnFailure: true, reportUnexpected: false }, [folder + path.sep + pathValidation]))
+        .on('error', function (err) {
+            console.error('the root folder doesn\'t have ' + pathValidation+ ' page and the web app may not be available'.yellow);
         })
 
         // exclude files with special characters in name
@@ -123,10 +136,10 @@ function dist(folder, appName){
                 },
 
                 "[\\w/\-\\s\.]*\\.ico$": {
-                  headers: {
-                    "Content-Type": "image/x-icon"
-                  },
-                  key: dir + "/" + "$&"
+                    headers: {
+                        "Content-Type": "image/x-icon"
+                    },
+                    key: dir + "/" + "$&"
                 },
 
                 "[\\w/\-\\s\.]*\\.jpeg$": {
@@ -151,10 +164,10 @@ function dist(folder, appName){
                 },
 
                 "[\\w/\-\\s\.]*\\.html": {
-                  headers: {
-                    "Content-Type": "text/html"
-                  },
-                  key: dir + "/" + "$&"
+                    headers: {
+                        "Content-Type": "text/html"
+                    },
+                    key: dir + "/" + "$&"
                 },
 
                 "^.+$": {
@@ -166,68 +179,58 @@ function dist(folder, appName){
 
             }
         }))
-        
-        // publisher will add Content-Length, Content-Type and headers specified above 
-        // If not specified it will set x-amz-acl to public-read by default 
+
+        // publisher will add Content-Length, Content-Type and headers specified above
+        // If not specified it will set x-amz-acl to public-read by default
         //.pipe(publisher.publish())
         .pipe(parallelize(publisher.publish(), 10))
-        
+
         .pipe(publisher.sync(dir + "/"))
-        
-        // create a cache file to speed up consecutive uploads 
+
+        // create a cache file to speed up consecutive uploads
         .pipe(publisher.cache())
-    
-        // print upload updates to console     
+
+        // print upload updates to console
         .pipe(awspublish.reporter())
         .pipe(notify({
             message: successMessage.green,
             title: "Success",
             onLast: true,
             notifier: function (options, callback) {
-                console.log(options.title + ":" + options.message);
                 callback();
             }
         }));
-        
+
 }
 
-function sts(username, password, accessToken){
+function sts(username, password, accessToken, appName){
+
+    var currentUrl = config.backand.protocol + "://" + config.backand.host + ":" + config.backand.port + "/1/syncInfo";
 
     if (fs.existsSync(temporaryCredentialsFile)) {
         credentials = JSON.parse(fs.readFileSync(temporaryCredentialsFile));
-    } 
+    }
     else{
         credentials ={};
     }
 
     var downloadOptions = {
-      url: accessToken ? sts_url : "https://" + username + ":" + password + "@" +   sts_url.replace(/http(s)?:\/\//, ''),
-      method: 'POST'
+        url: accessToken ? currentUrl : config.backand.protocol + "://" + username + ":" + password + "@" +
+        config.backand.host + ":" + config.backand.port + "/1/syncInfo",
+        method: 'POST' //todo: replace to config
     };
     if (accessToken){
-        downloadOptions.headers = { 
+        downloadOptions.headers = {
             'Authorization': 'Bearer' + " " + accessToken
         };
     }
 
     return download({
-          fileName: temporaryCredentialsFile,
-          request: downloadOptions
-        })
-        .pipe(jeditor(function(json) {   // must return JSON object.  
-
-            var appName = json.Info.Dir;
-            var stsCredentials = {
-                credentials: { 
-                    accessKeyId: json.Credentials.AccessKeyId,
-                    secretAccessKey: json.Credentials.SecretAccessKey,
-                    sessionToken: json.Credentials.SessionToken
-                },
-                info: {
-                    bucket: json.Info.Bucket,
-                    dir: json.Info.Dir
-                }
-            };            
+        fileName: temporaryCredentialsFile,
+        request: downloadOptions
+    })
+        .pipe(jeditor(function(json) {   // must return JSON object.
+            var stsCredentials = json;
             if (credentials[appName]){
                 credentials[appName] = _.extend(credentials[appName], stsCredentials)
             }
@@ -237,7 +240,7 @@ function sts(username, password, accessToken){
             return credentials;
         }))
         .pipe(gulp.dest('.'))
-      ;
+        ;
 }
 
 function clean(){
@@ -248,6 +251,7 @@ function clean(){
 module.exports = {
     dist: dist,
     sts: sts,
-    clean: clean
+    clean: clean,
+    config: config
 }
 
