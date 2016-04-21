@@ -29,7 +29,7 @@ var specialChars = "[" + "@#" + "]";
 function dist(folder, appName, service, destFolder){
 
     if (!service)
-        service == "hosting";
+        service = "hosting";
 
     // get credentials
     var cred = fs.readFileSync(temporaryCredentialsFile, 'utf8');
@@ -94,14 +94,17 @@ function dist(folder, appName, service, destFolder){
     var pathValidation = 'index.html';
     if (service === "nodejs")
         pathValidation = "handler.js";
-    // this will publish and sync bucket files with the one in your public directory
+
+    try {
+        fs.accessSync(folder + path.sep + pathValidation, fs.F_OK);
+        // Do nothing
+    } catch (e) {
+        console.error('the root folder doesn\'t have ' + pathValidation+ ' page and the web app may not be available'.yellow);
+        process.exit(1);
+        // It isn't accessible
+    }
+
     return gulp.src(folder + '/**/*.*')
-
-        .pipe(expect({ errorOnFailure: true, reportUnexpected: false }, [folder + path.sep + pathValidation]))
-        .on('error', function (err) {
-            console.error('the root folder doesn\'t have ' + pathValidation+ ' page and the web app may not be available'.yellow);
-        })
-
         // exclude files with special characters in name
         .pipe(gulpIgnore.exclude(condition))
 
