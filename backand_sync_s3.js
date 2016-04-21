@@ -96,7 +96,7 @@ function dist(folder, appName, service, destFolder){
         pathValidation = "handler.js";
 
     try {
-        fs.accessSync(folder + path.sep + pathValidation, fs.F_OK);
+        fs.accessSync(folder + "/" + pathValidation, fs.F_OK);
         // Do nothing
     } catch (e) {
         console.error('the root folder doesn\'t have ' + pathValidation+ ' page and the web app may not be available'.yellow);
