@@ -117,6 +117,13 @@ function dist(folder, appName, service, destFolder){
         .pipe(awspublishRouter({
             routes: {
 
+                "[\\w/\-\\s\.]*\\.pdf$": {
+                    headers: {
+                        "Content-Type": "application/pdf"
+                    },
+                    key: dir + "/" + "$&"
+                },
+
                 "[\\w/\-\\s\.]*\\.css$": {
                     headers: {
                         "Content-Type": "text/css"
@@ -134,6 +141,20 @@ function dist(folder, appName, service, destFolder){
                 "[\\w/\-\\s\.]*\\.jpg$": {
                     headers: {
                         "Content-Type": "image/jpg"
+                    },
+                    key: dir + "/" + "$&"
+                },
+
+                "[\\w/\-\\s\.]*\\.bmp$": {
+                    headers: {
+                        "Content-Type": "image/bmp"
+                    },
+                    key: dir + "/" + "$&"
+                },
+
+                "[\\w/\-\\s\.]*\\.tiff$": {
+                    headers: {
+                        "Content-Type": "image/tiff"
                     },
                     key: dir + "/" + "$&"
                 },
@@ -169,6 +190,13 @@ function dist(folder, appName, service, destFolder){
                 "[\\w/\-\\s\.]*\\.html": {
                     headers: {
                         "Content-Type": "text/html"
+                    },
+                    key: dir + "/" + "$&"
+                },
+
+                "[\\w/\-\\s\.]*\\.zip": {
+                    headers: {
+                        "Content-Type": "application/zip"
                     },
                     key: dir + "/" + "$&"
                 },
