@@ -138,6 +138,13 @@ function dist(folder, appName, service, destFolder){
                     key: dir + "/" + "$&"
                 },
 
+                "[\\w/\-\\s\.]*\\.ts$": {
+                    headers: {
+                        "Content-Type": "application/x-typescript"
+                    },
+                    key: dir + "/" + "$&"
+                },
+
                 "[\\w/\-\\s\.]*\\.jpg$": {
                     headers: {
                         "Content-Type": "image/jpg"
