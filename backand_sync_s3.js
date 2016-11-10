@@ -194,6 +194,13 @@ function dist(folder, appName, service, destFolder){
                     key: dir + "/" + "$&"
                 },
 
+                "[\\w/\-\\s\.]*\\.svg$": {
+                    headers: {
+                        "Content-Type": "image/svg"
+                    },
+                    key: dir + "/" + "$&"
+                },
+
                 "[\\w/\-\\s\.]*\\.html": {
                     headers: {
                         "Content-Type": "text/html"
