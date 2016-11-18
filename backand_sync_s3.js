@@ -196,7 +196,7 @@ function dist(folder, appName, service, destFolder){
 
                 "[\\w/\-\\s\.]*\\.svg$": {
                     headers: {
-                        "Content-Type": "image/svg-xml"
+                        "Content-Type": "image/svg+xml"
                     },
                     key: dir + "/" + "$&"
                 },
