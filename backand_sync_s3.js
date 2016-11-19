@@ -100,7 +100,7 @@ function dist(folder, appName, service, destFolder){
         // Do nothing
     } catch (e) {
         console.error('the root folder doesn\'t have ' + pathValidation+ ' page and the web app may not be available'.yellow);
-        process.exit(1);
+        
         // It isn't accessible
     }
 
