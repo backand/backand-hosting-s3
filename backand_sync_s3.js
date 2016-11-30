@@ -26,8 +26,7 @@ var temporaryCredentialsFile = './.backand-credentials.json';
 // files with such characters are not synced
 var specialChars = "[" + "@#" + "]";
 
-function dist(folder, appName, service, destFolder){
-
+function dist(folder, appName, service, destFolder, zipFile){
     if (!service)
         service = "hosting";
 
@@ -91,20 +90,22 @@ function dist(folder, appName, service, destFolder){
         return flag;
     }
 
-    var pathValidation = 'index.html';
-    if (service === "nodejs")
-        pathValidation = "handler.js";
+    var pathValidation = '';
+    if (service === "hosting")
+        pathValidation = 'index.html';
 
     try {
-        fs.accessSync(folder + "/" + pathValidation, fs.F_OK);
-        // Do nothing
+        if (pathValidation)
+            fs.accessSync(folder + "/" + pathValidation, fs.F_OK);
     } catch (e) {
-        console.error('the root folder doesn\'t have ' + pathValidation+ ' page and the web app may not be available'.yellow);
-        
         // It isn't accessible
+        if (service == 'hosting') {
+          console.error('the root folder doesn\'t have ' + pathValidation+ ' page and the web app may not be available'.yellow);  
+        }
     }
 
-    return gulp.src(folder + '/**/*.*')
+    var sources = service == 'hosting' ? folder + '/**/*.*' : folder + "/" + zipFile;
+    return gulp.src(sources)
         // exclude files with special characters in name
         .pipe(gulpIgnore.exclude(condition))
 
