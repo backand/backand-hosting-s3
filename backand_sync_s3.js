@@ -237,7 +237,9 @@ function dist(folder, appName, service, destFolder, zipFile){
         .pipe(publisher.cache())
 
         // print upload updates to console
-        .pipe(awspublish.reporter())
+        .pipe(awspublish.reporter({
+          states: []
+        }))
         .pipe(notify({
             message: successMessage.green,
             title: "Success",
